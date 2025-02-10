@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,12 @@ Route::get('/getPractice', [PracticeController::class, 'getPractice']);
 
 //　MovieControllerに対してデータを渡すルーティング
 Route::get('/movies', [MovieController::class, 'index']);
+
+
+//　管理者用のルーティング設定を行う
+Route::get('/admin/movies', [AdminMovieController::class, 'index'])->name('admin.movies.index');
+//個別の映画を取得するためのルーティング
+Route::get('/admin/movies/{id}', [AdminMovieController::class, 'show'])->name('admin.movies.show');
 
 
 // Route::get('practice', function() {
