@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PracticeController;
+use App\Http\Controllers\MovieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,9 @@ Route::get('/practice3', [PracticeController::class, 'sample3']);
 
 //　Modelのデータを取得するルーティング
 Route::get('/getPractice', [PracticeController::class, 'getPractice']);
+
+//　MovieControllerに対してデータを渡すルーティング
+Route::get('/movies', [MovieController::class, 'index']);
 
 
 // Route::get('practice', function() {
