@@ -6,7 +6,7 @@
     <title>{{ $movie->title }} - 詳細</title>
 </head>
 <body>
-    <h1>{{ $movie->title }} ({{ $movie->release_year }})</h1>
+    <h1>{{ $movie->title }} ({{ $movie->published_year }})</h1>
     <img src="{{ $movie->image_url }}" alt="{{ $movie->title }}" width="200">
     <p><strong>概要:</strong> {{ $movie->description }}</p>
     <p><strong>上映状況:</strong> {{ $movie->status }}</p>

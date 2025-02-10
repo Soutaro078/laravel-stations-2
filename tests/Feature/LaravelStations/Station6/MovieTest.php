@@ -20,7 +20,10 @@ class MovieTest extends TestCase
         for ($i = 0; $i < $count; $i++) {
             Movie::insert([
                 'title' => 'タイトル' . $i,
-                'image_url' => 'https://techbowl.co.jp/_nuxt/img/6074f79.png'
+                'image_url' => 'https://techbowl.co.jp/_nuxt/img/6074f79.png',
+                // 'published_year' => 2000 + $i, // ここに値を追加
+                // 'description' => '概要' . $i,
+                // 'is_showing' => (bool)random_int(0, 1),
             ]);
         }
         $movies = Movie::all();

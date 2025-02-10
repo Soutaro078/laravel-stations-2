@@ -11,14 +11,7 @@ class MovieController extends Controller
     public function index(){
 
         $movies = Movie::all();
-        return view('admin.movie.index', ['movies' => $movies]);    
-    }
-
-    //　個別のIDのデータを取得するもの
-    public function show($id)
-    {
-        $movie = Movie::findOrFail($id);
-        return view('admin.movies.show', compact('movie'));
+        return view('index', ['movies' => $movies]);    
     }
 
 }

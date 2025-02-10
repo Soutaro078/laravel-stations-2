@@ -5,6 +5,7 @@ use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\Admin\MovieController as AdminMovieController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,8 +35,17 @@ Route::get('/movies', [MovieController::class, 'index']);
 
 //　管理者用のルーティング設定を行う
 Route::get('/admin/movies', [AdminMovieController::class, 'index'])->name('admin.movies.index');
+
+// 映画の新規登録画面を表示（ここをmoviesに分けずにやったらできた（謎）
+Route::get('/admin/movies/create', [AdminMovieController::class, 'create'])->name('admin.movies.create');
+
 //個別の映画を取得するためのルーティング
 Route::get('/admin/movies/{id}', [AdminMovieController::class, 'show'])->name('admin.movies.show');
+
+// 映画の登録処理（フォーム送信先）
+Route::post('/admin/movies/store', [AdminMovieController::class, 'store'])->name('admin.movies.store');
+
+
 
 
 // Route::get('practice', function() {
