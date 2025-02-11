@@ -31,4 +31,6 @@ class PracticeController extends Controller
         return view('getPractice', ['practices' => $practices]);    
     }
 
+    
+
 }
