@@ -16,6 +16,7 @@ class MovieFactory extends Factory
         return [
             'title' => $this->faker->unique()->word,
             'image_url' => $this->faker->imageUrl(),
+            'genre_id' => $this->faker->numberBetween(1, 10),
             'published_year' => $this->faker->year,
             'description' => $this->faker->realText(20),
             'is_showing' => $this->faker->boolean,

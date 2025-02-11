@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Sheet;
 use App\Models\Movie;
 
 class DatabaseSeeder extends Seeder
@@ -14,7 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        Movie::factory(10)->create();
+        // 15個のデータを Factory で作成
+        Sheet::factory()->count(15)->create();
     }
 
     // public function run()

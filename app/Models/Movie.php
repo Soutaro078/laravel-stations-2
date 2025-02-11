@@ -9,11 +9,16 @@ class Movie extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'image_url', 'published_year', 'description', 'is_showing'];
+    protected $fillable = ['title', 'image_url', 'published_year', 'description', 'is_showing', 'genre_id'];
 
     // is_showing の値を「上映中」「上映予定」に変換するメソッド
     public function getStatusAttribute()
     {
         return $this->is_showing ? '上映中' : '上映予定';
+    }
+
+    public function genre()
+    {
+        return $this->belongsTo(Genre::class);
     }
 }

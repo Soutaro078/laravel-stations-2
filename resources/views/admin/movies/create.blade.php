@@ -34,6 +34,9 @@
         <label>公開年:</label>
         <input type="number" name="published_year" min="1900" max="{{ date('Y') }}" value="{{ old('published_year') }}"><br>
 
+        <label>ジャンル:</label>
+        <input type="text" name="genre" value="{{ old('genre') }}"><br>
+
         <label>概要:</label>
         <textarea name="description">{{ old('description') }}</textarea><br>
 

@@ -12,12 +12,17 @@ return new class extends Migration
     {
         Schema::create('movies', function (Blueprint $table) {
             $table->id();
-            $table->text('title')->comment('映画タイトル');
+            $table->string('title', 255)->unique()->comment('映画タイトル');
             $table->text('image_url')->comment('画像URL');
             $table->integer('published_year')->default(2025)->comment('公開年'); // 修正
             $table->boolean('is_showing')->default(false)->comment('上映中かどうか');
             $table->text('description')->comment('概要');
+            $table->unsignedBigInteger('genre_id')->comment('ジャンルID'); //  外部キーのカラム追加
             $table->timestamps();
+        });
+
+        Schema::table('movies', function (Blueprint $table) {
+            $table->foreign('genre_id')->references('id')->on('genres')->onDelete('cascade');
         });
     }
 

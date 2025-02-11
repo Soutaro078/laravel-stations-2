@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Movie;
+use App\Models\Genre;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class MovieController extends Controller
 {
@@ -19,7 +21,9 @@ class MovieController extends Controller
     public function edit($id)
     {
         $movie = Movie::findOrFail($id);
-        return view('admin.movies.edit', compact('movie'));
+        $genre = $movie->genre ; // 🔹 紐づいているジャンルを取得（なければ null）
+
+        return view('admin.movies.edit', compact('movie', 'genre'));
     }
 
     // 個別のIDのデータを取得するもの
@@ -31,8 +35,9 @@ class MovieController extends Controller
 
     // 新規登録フォームの表示
     public function create()
-    {
-        return view('admin.movies.create');
+    {   
+        $genres = Genre::all(); // ジャンルを取得
+        return view('admin.movies.create',compact('genres'));
     }
 
     // 削除処理
@@ -54,67 +59,91 @@ class MovieController extends Controller
     // 新規登録処理
     public function store(Request $request)
     {
-        // バリデーション（タイトルの重複をチェック）
         $request->validate([
-            'title' => 'required|unique:movies,title|max:255',
-            'published_year' => 'required|integer|min:1900|max:' . date('Y'), // `published_year` に統一
-            'description' => 'required|string',
+            'title' => 'required|string|unique:movies',
             'image_url' => 'required|url',
-            'is_showing' => 'required|boolean'
-        ],);
-
-        // [
-        //     'title.required' => 'タイトルは必須です。',
-        //     'title.unique' => 'このタイトルはすでに登録されています。',
-        //     'published_year.required' => '公開年は必須です。',
-        //     'published_year.integer' => '公開年は数値で入力してください。',
-        //     'published_year.min' => '公開年は1900年以降を指定してください。',
-        //     'published_year.max' => '公開年は未来の年を指定できません。',
-        //     'image_url.required' => '画像URLは必須です。',
-        //     'image_url.url' => '画像URLの形式が正しくありません。',
-        // ]
-
-        // 映画を作成
-        Movie::create([
-            'title' => $request->title,
-            'published_year' => $request->published_year, // `published_year` に統一
-            'description' => nl2br(e($request->description)), // 改行を許可
-            'image_url' => $request->image_url,
-            'is_showing' => (bool) $request->is_showing // `boolean` に変換
+            'published_year' => 'required|integer|min:1900|max:' . date('Y'),
+            'description' => 'required|string',
+            'is_showing' => 'required|boolean',
+            'genre' => 'required|string|max:255', // 🔹 ジャンルは必須
         ]);
+        
+        try {
+            // 🔹 トランザクション開始（ここでIDをとってくる）
+            return DB::transaction(function () use ($request) {
+                // 🔹 ジャンルを検索（大文字・小文字区別なし）
+                $genre = Genre::where('name', $request->input('genre'))->first();
+        
+                // 🔹 存在しなければ新規作成
+                if (!$genre) {
+                    $genre = Genre::create(['name' => $request->input('genre')]);
+                }
 
-        // 成功メッセージをセッションに保存
-        Session::flash('success', '映画を登録しました！');
+                if (strlen($request->input('title')) > 255) {
+                    throw new \Exception('タイトルが長すぎます'); // 500 エラー
+                }
 
-        // 一覧ページにリダイレクト
-        return redirect()->route('admin.movies.index');
+                // 🔹 映画のデータを作成
+                $movie = Movie::create([
+                    'title' => $request->input('title'),
+                    'image_url' => $request->input('image_url'),
+                    'published_year' => $request->input('published_year'),
+                    'description' => $request->input('description'),
+                    'is_showing' => $request->input('is_showing'),
+                    'genre_id' => $genre->id, // 🔹 紐付け
+                ]);
+        
+                return redirect()->route('admin.movies.index')->with('success', '映画を追加しました');
+            });
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     // 編集後の更新処理
     public function update(Request $request, $id)
     {
-        // 更新対象となるデータを取得する
-        $movie = Movie::find($id);
-
-        // 入力値チェックを行う
-        // タイトルは20文字以内、本文は400文字以内という制限を設ける
-        // $validated = $request->validate([
-        //     'title' => 'required|max:20',
-        //     'description' => 'required|max:400',
-        // ]);
-        // バリデーション（タイトルの重複をチェック）
-        $validated = $request->validate([
-            'title' => 'required|unique:movies,title,' . $id . '|max:255',
-            'published_year' => 'required|integer|min:1900|max:' . date('Y'), // `published_year` に統一
-            'description' => 'required|string',
+        $request->validate([
+            'title' => 'required|string|unique:movies',
             'image_url' => 'required|url',
-            'is_showing' => 'required|boolean'
-        ],);
-        // チェック済みの値を使用して更新処理を行う
-        $movie->update($validated);
+            'published_year' => 'required|integer|min:1900|max:' . date('Y'),
+            'description' => 'required|string',
+            'is_showing' => 'required|boolean',
+            'genre' => 'required|string|max:255', // 🔹 ジャンルは必須
+        ]);
+    
+        try {
+            // 🔹 トランザクション開始
+            return DB::transaction(function () use ($request, $id) {
+                $movie = Movie::findOrFail($id);
+        
+                // 🔹 ジャンルを検索
+                $genre = Genre::where('name', $request->input('genre'))->first();
+        
+                // 🔹 存在しなければ新規作成
+                if (!$genre) {
+                    $genre = Genre::create(['name' => $request->input('genre')]);
+                }
 
-        // 更新後、映画詳細ページにリダイレクトし、成功メッセージを表示
-        return redirect()->route('admin.movies.index');
+                if (strlen($request->input('title')) > 255) {
+                    throw new \Exception('タイトルが長すぎます'); // 500 エラー
+                }
+        
+                // 🔹 映画のデータを更新
+                $movie->update([
+                    'title' => $request->input('title'),
+                    'image_url' => $request->input('image_url'),
+                    'published_year' => $request->input('published_year'),
+                    'description' => $request->input('description'),
+                    'is_showing' => $request->input('is_showing'),
+                    'genre_id' => $genre->id, // 🔹 紐付け
+                ]);
+        
+                return redirect()->route('admin.movies.index')->with('success', '映画情報を更新しました');
+            });
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
     
 }

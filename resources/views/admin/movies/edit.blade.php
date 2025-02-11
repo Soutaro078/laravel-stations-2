@@ -36,6 +36,9 @@
         <label>公開年:</label>
         <input type="number" name="published_year" min="1900" max="{{ date('Y') }}" value="{{ old('published_year', $movie->published_year) }}"><br>
 
+        <label>ジャンル:</label>
+        <input type="text" name="genre" value="{{ old('genre', $genre ? $genre->name : '') }}"><br>
+
         <label>概要:</label>
         <textarea name="description">{{ old('description', $movie->description) }}</textarea><br>
 
